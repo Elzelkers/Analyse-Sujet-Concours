@@ -119,16 +119,28 @@ ipcMain.on('filter-data', (event, filters) => {
         const matchConcours = concoursFilter.length === 0 || concoursFilter.includes(item["Concours"]);
         const matchAnneeMin = !filters.anneeMin || parseInt(item["Année"]) >= filters.anneeMin;
         const matchAnneeMax = !filters.anneeMax || parseInt(item["Année"]) <= filters.anneeMax;
+        
+        // Vérification des mots clés
+        const keywords = filters.keywords || [];
+        const itemKeywords = item["Mots_clés"] ? item["Mots_clés"].toLowerCase().split(/[,\s]+/) : [];
+        const matchKeywords = keywords.length === 0 || keywords.some(keyword => 
+            itemKeywords.some(itemKeyword => itemKeyword.includes(keyword))
+        );
 
-        return matchMatiere && matchFiliere && matchConcours && matchAnneeMin && matchAnneeMax;
+        return matchMatiere && matchFiliere && matchConcours && matchAnneeMin && matchAnneeMax && matchKeywords;
     });
 
     // Get unique subjects count using Set
     const uniqueSujets = new Set(filtered.map(item => item["Nom"]));
     const totalItems = uniqueSujets.size;
 
+    // Calculer le nombre de sujets correspondant aux mots clés
+    const totalSujetsCorrespondants = filters.keywords && filters.keywords.length > 0 
+        ? filtered.length 
+        : totalItems;
+
     if (totalItems === 0) {
-        event.sender.send('filtered-data', { resultats: {}, totalSujets: 0 });
+        event.sender.send('filtered-data', { resultats: {}, totalSujets: 0, totalSujetsCorrespondants: 0 });
         return;
     }
 
@@ -153,5 +165,5 @@ ipcMain.on('filter-data', (event, filters) => {
         return res;
     }, {});
 
-    event.sender.send('filtered-data', { resultats, totalSujets: totalItems });
+    event.sender.send('filtered-data', { resultats, totalSujets: totalItems, totalSujetsCorrespondants });
 });

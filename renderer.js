@@ -53,6 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Fonction pour récupérer les mots clés de la barre de recherche
+    function getSearchKeywords() {
+        const keywords = document.getElementById('search').value.trim().toLowerCase();
+        return keywords ? keywords.split(/\s+/) : [];
+    }
+
     // Récupération des valeurs et envoi du filtre lors du clic
     document.getElementById('analyser').addEventListener('click', () => {
         const filterData = {
@@ -62,16 +68,17 @@ document.addEventListener('DOMContentLoaded', () => {
             anneeMax: parseInt(document.getElementById('anneeMax').value),
             concours: Array.from(document.getElementById('concours').selectedOptions)
                         .filter(option => option.value !== "")
-                        .map(option => option.value)
+                        .map(option => option.value),
+            keywords: getSearchKeywords()
         };
         ipcRenderer.send('filter-data', filterData);
     });
 
     // Ajout de l'affichage des résultats
-    ipcRenderer.on('filtered-data', (event, { resultats, totalSujets }) => {
+    ipcRenderer.on('filtered-data', (event, { resultats, totalSujets, totalSujetsCorrespondants }) => {
         const resultatDiv = document.getElementById('resultats');
         let html = `
-            <h3>Résultats de l'analyse</h3>
+            <h3>Résultats de l'analyse${totalSujetsCorrespondants !== undefined ? ` (${totalSujetsCorrespondants} sujet${totalSujetsCorrespondants > 1 ? 's' : ''} correspondant${totalSujetsCorrespondants > 1 ? 's' : ''} aux mots clés)` : ''}</h3>
             <div style="
                 background: #e8f4f8;
                 padding: 15px;

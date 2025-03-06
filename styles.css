@@ -1,0 +1,52 @@
+.keyword-list {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.keyword-item {
+    position: relative;
+    padding: 10px 15px;
+    margin: 5px 0;
+}
+
+.keyword-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--percentage, 0%);
+    max-width: 100%;
+    background: rgba(52, 152, 219, 0.2);
+    border-radius: 5px;
+    z-index: 0;
+    transition: width 0.3s ease;
+}
+
+.keyword-text {
+    position: relative;
+    z-index: 1;
+    color: #2c3e50;
+}
+
+.error {
+    color: #e74c3c;
+    padding: 10px;
+    background: #fde8e7;
+    border-radius: 5px;
+    margin: 10px 0;
+}
+
+#resultats {
+    margin-top: 20px;
+}
+
+#resultats p {
+    background: #e8f4f8;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #2c3e50;
+} 
