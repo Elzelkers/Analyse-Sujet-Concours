@@ -1,0 +1,50 @@
+{
+  "name": "analyse-sujets",
+  "version": "1.0.0",
+  "description": "Application d'analyse des sujets de concours",
+  "author": {
+    "name": "Claude Sonnette",
+    "email": "Claude.Sonnette@proton.me"
+  },
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder build --mac --win --linux",
+    "build:mac": "electron-builder build --mac",
+    "build:win": "electron-builder build --win",
+    "build:linux": "electron-builder build --linux"
+  },
+  "build": {
+    "appId": "com.votreapp.analyse-sujets",
+    "productName": "Analyse Sujets Concours",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.education"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "jsdom": "26.0.0"
+  },
+  "devDependencies": {
+    "electron": "^34.2.0",
+    "electron-builder": "^24.13.3"
+  }
+}
