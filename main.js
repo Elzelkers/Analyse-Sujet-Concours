@@ -2,17 +2,26 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
+// Configuration constants
+const CONFIG = {
+    minYear: 1990,
+    windowWidth: 800,
+    windowHeight: 600,
+    jsonPath: path.join(__dirname, 'assets', 'Doc Solus.json')
+};
+
+const isProduction = process.env.NODE_ENV === 'production';
 let mainWindow;
 let jsonData = null; // Store JSON data in memory
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: CONFIG.windowWidth,
+        height: CONFIG.windowHeight,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false
-            // TODO: For production, enable contextIsolation and use preload script
+            nodeIntegration: !isProduction,
+            contextIsolation: isProduction,
+            preload: isProduction ? path.join(__dirname, 'preload.js') : undefined
         }
     });
 
@@ -22,8 +31,7 @@ function createWindow() {
 // Load JSON data and initialize application
 async function initializeApp() {
     try {
-        const jsonPath = path.join(__dirname, 'assets', 'Doc Solus.json');
-        const data = await fs.promises.readFile(jsonPath, 'utf-8');
+        const data = await fs.promises.readFile(CONFIG.jsonPath, 'utf-8');
         jsonData = JSON.parse(data);
         
         createWindow();
@@ -70,18 +78,16 @@ function sendInitialData() {
 // Validate year range
 function validateYearRange(min, max) {
     const currentYear = new Date().getFullYear();
-    const minYear = 1990; // Adjust this based on your data requirements
+    const parsedMin = parseInt(min);
+    const parsedMax = parseInt(max);
 
-    min = parseInt(min);
-    max = parseInt(max);
-
-    if (min && (min < minYear || min > currentYear)) {
+    if (!Number.isNaN(parsedMin) && (parsedMin < CONFIG.minYear || parsedMin > currentYear)) {
         return false;
     }
-    if (max && (max < minYear || max > currentYear)) {
+    if (!Number.isNaN(parsedMax) && (parsedMax < CONFIG.minYear || parsedMax > currentYear)) {
         return false;
     }
-    if (min && max && min > max) {
+    if (!Number.isNaN(parsedMin) && !Number.isNaN(parsedMax) && parsedMin > parsedMax) {
         return false;
     }
 
@@ -103,11 +109,14 @@ ipcMain.on('filter-data', (event, filters) => {
 
     console.log('Filtres appliqués:', filters); // Debug log
 
+    // Ensure concours is an array
+    const concoursFilter = Array.isArray(filters.concours) ? filters.concours : [];
+
     // Apply filters
     const filtered = jsonData.filter(item => {
         const matchMatiere = !filters.matiere || item["Matière"] === filters.matiere;
         const matchFiliere = !filters.filiere || item["Filière"] === filters.filiere;
-        const matchConcours = filters.concours.length === 0 || filters.concours.includes(item["Concours"]);
+        const matchConcours = concoursFilter.length === 0 || concoursFilter.includes(item["Concours"]);
         const matchAnneeMin = !filters.anneeMin || parseInt(item["Année"]) >= filters.anneeMin;
         const matchAnneeMax = !filters.anneeMax || parseInt(item["Année"]) <= filters.anneeMax;
 
@@ -123,16 +132,25 @@ ipcMain.on('filter-data', (event, filters) => {
         return;
     }
 
-    const resultats = filtered.reduce((acc, item) => {
+    // First pass: count occurrences
+    const counts = filtered.reduce((acc, item) => {
         const motCle = item["Mots_clés"];
         if (motCle) {
             if (!acc[motCle]) {
-                acc[motCle] = { count: 0, percentage: 0 };
+                acc[motCle] = { count: 0 };
             }
             acc[motCle].count++;
-            acc[motCle].percentage = (acc[motCle].count / totalItems) * 100;
         }
         return acc;
+    }, {});
+
+    // Second pass: calculate percentages
+    const resultats = Object.keys(counts).reduce((res, key) => {
+        res[key] = {
+            count: counts[key].count,
+            percentage: (counts[key].count / totalItems) * 100
+        };
+        return res;
     }, {});
 
     event.sender.send('filtered-data', { resultats, totalSujets: totalItems });
