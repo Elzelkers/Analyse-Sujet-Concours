@@ -112,39 +112,38 @@ ipcMain.on('filter-data', (event, filters) => {
     // Ensure concours is an array
     const concoursFilter = Array.isArray(filters.concours) ? filters.concours : [];
 
-    // Apply filters
-    const filtered = jsonData.filter(item => {
+    // Apply filters without keywords first
+    const filteredWithoutKeywords = jsonData.filter(item => {
         const matchMatiere = !filters.matiere || item["Matière"] === filters.matiere;
         const matchFiliere = !filters.filiere || item["Filière"] === filters.filiere;
         const matchConcours = concoursFilter.length === 0 || concoursFilter.includes(item["Concours"]);
         const matchAnneeMin = !filters.anneeMin || parseInt(item["Année"]) >= filters.anneeMin;
         const matchAnneeMax = !filters.anneeMax || parseInt(item["Année"]) <= filters.anneeMax;
-        
-        // Vérification des mots clés
-        const keywords = filters.keywords || [];
-        const itemKeywords = item["Mots_clés"] ? item["Mots_clés"].toLowerCase().split(/[,\s]+/) : [];
-        const matchKeywords = keywords.length === 0 || keywords.some(keyword => 
-            itemKeywords.some(itemKeyword => itemKeyword.includes(keyword))
-        );
 
-        return matchMatiere && matchFiliere && matchConcours && matchAnneeMin && matchAnneeMax && matchKeywords;
+        return matchMatiere && matchFiliere && matchConcours && matchAnneeMin && matchAnneeMax;
     });
 
-    // Get unique subjects count using Set
-    const uniqueSujets = new Set(filtered.map(item => item["Nom"]));
-    const totalItems = uniqueSujets.size;
+    // Then apply keyword filter
+    const filtered = filteredWithoutKeywords.filter(item => {
+        const keywords = filters.keywords || [];
+        const itemKeywords = item["Mots_clés"] ? item["Mots_clés"].toLowerCase().split(/[,\s]+/) : [];
+        return keywords.length === 0 || keywords.some(keyword => 
+            itemKeywords.some(itemKeyword => itemKeyword.includes(keyword))
+        );
+    });
 
-    // Calculer le nombre de sujets correspondant aux mots clés
-    const totalSujetsCorrespondants = filters.keywords && filters.keywords.length > 0 
-        ? filtered.length 
-        : totalItems;
+    // Get counts
+    const uniqueSujetsTotal = new Set(filteredWithoutKeywords.map(item => item["Nom"]));
+    const uniqueSujetsCorrespondants = new Set(filtered.map(item => item["Nom"]));
+    const totalSujets = uniqueSujetsTotal.size;
+    const totalSujetsCorrespondants = uniqueSujetsCorrespondants.size;
 
-    if (totalItems === 0) {
+    if (totalSujets === 0) {
         event.sender.send('filtered-data', { resultats: {}, totalSujets: 0, totalSujetsCorrespondants: 0 });
         return;
     }
 
-    // First pass: count occurrences
+    // Count occurrences for the filtered results
     const counts = filtered.reduce((acc, item) => {
         const motCle = item["Mots_clés"];
         if (motCle) {
@@ -160,10 +159,10 @@ ipcMain.on('filter-data', (event, filters) => {
     const resultats = Object.keys(counts).reduce((res, key) => {
         res[key] = {
             count: counts[key].count,
-            percentage: (counts[key].count / totalItems) * 100
+            percentage: (counts[key].count / totalSujets) * 100
         };
         return res;
     }, {});
 
-    event.sender.send('filtered-data', { resultats, totalSujets: totalItems, totalSujetsCorrespondants });
+    event.sender.send('filtered-data', { resultats, totalSujets, totalSujetsCorrespondants });
 });

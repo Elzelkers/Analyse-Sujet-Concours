@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.on('filtered-data', (event, { resultats, totalSujets, totalSujetsCorrespondants }) => {
         const resultatDiv = document.getElementById('resultats');
         let html = `
-            <h3>Résultats de l'analyse${totalSujetsCorrespondants !== undefined ? ` (${totalSujetsCorrespondants} sujet${totalSujetsCorrespondants > 1 ? 's' : ''} correspondant${totalSujetsCorrespondants > 1 ? 's' : ''} aux mots clés)` : ''}</h3>
+            <h3>Résultats de l'analyse (sur ${totalSujets} sujet${totalSujets > 1 ? 's' : ''})</h3>
             <div style="
                 background: #e8f4f8;
                 padding: 15px;
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 font-weight: bold;
                 color: #2c3e50;
             ">
-                Nombre total de sujets : ${totalSujets}
+                ${totalSujetsCorrespondants} sujet${totalSujetsCorrespondants > 1 ? 's' : ''} correspond${totalSujetsCorrespondants > 1 ? 'ent' : ''} aux mots clés
             </div>
         `;
             
