@@ -114,8 +114,10 @@ ipcMain.on('filter-data', (event, filters) => {
         return matchMatiere && matchFiliere && matchConcours && matchAnneeMin && matchAnneeMax;
     });
 
-    // Calculate statistics using reduce
-    const totalItems = filtered.length;
+    // Get unique subjects count using Set
+    const uniqueSujets = new Set(filtered.map(item => item["Nom"]));
+    const totalItems = uniqueSujets.size;
+
     if (totalItems === 0) {
         event.sender.send('filtered-data', { resultats: {}, totalSujets: 0 });
         return;
