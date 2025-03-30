@@ -11,7 +11,7 @@ To decide on the next topic to focus on, consider the following:
 - Chapters you've covered less: look for rows with fewer colors in your Excel document.
 - Chapters that are most frequently tested: check the statistics provided by the app.
 
-Once you've identified the keywords or chapters you want to revise, visit the [Doc-solus database](https://www.doc-solus.fr/) (free of charge) and use the "Travailler un chapitre" search feature, which lists all the subjects per concours and provides independent questions numbers for each subject.
+Once you've identified the keywords or chapters you want to revise, visit the [Doc-solus database](https://www.doc-solus.fr/) (free of charge) and you can use the "Travailler un chapitre" search feature, which lists all the subjects per concours and provides independent questions numbers for each subject.
 
 ## Downloading.
 
