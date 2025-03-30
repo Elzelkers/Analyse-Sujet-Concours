@@ -6,7 +6,7 @@ This is an Electron app that can be downloaded on Linux, Mac and Windows. The ap
 
 In the preparatory weeks before the Concours: I advise you to create an excel document to keep a register of the subject that you will do: for example, an array with subjects in line and main chapters in column. Then use colors to indicate the proportion of each chapter in the subject.
 
-To choose the next chapter, you will take into account the chapters little covered by reading the excel document and the subject that fall the most thanks to the application.
+In order to choose the next topic, you will take into account the chapters that you have covered less by reading the Excel document and the chapters that fall most thanks to the application.
 
 # Downloading.
 
