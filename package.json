@@ -9,10 +9,10 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder build --mac --win --linux",
-    "build:mac": "electron-builder build --mac",
-    "build:win": "electron-builder build --win",
-    "build:linux": "electron-builder build --linux"
+    "build": "electron-builder -mwl",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:linux": "electron-builder --linux"
   },
   "build": {
     "appId": "com.votreapp.analyse-sujets",
@@ -30,13 +30,47 @@
       }
     ],
     "mac": {
-      "category": "public.app-category.education"
+      "category": "public.app-category.education",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64", "x64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["arm64", "x64"]
+        }
+      ]
     },
     "win": {
-      "target": "nsis"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "artifactName": "${productName}-Setup-${version}-${arch}.exe",
+      "publisherName": "Claude Sonnette",
+      "verifyUpdateCodeSignature": false,
+      "signingHashAlgorithms": ["sha256"]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": true
     },
     "linux": {
-      "target": "AppImage"
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["arm64", "x64"]
+        }
+      ]
     }
   },
   "dependencies": {
